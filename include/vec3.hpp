@@ -35,6 +35,7 @@ public:
 		buf[0] += v.buf[0];
 		buf[1] += v.buf[1];
 		buf[2] += v.buf[2];
+		return *this;
 	}
 	Vec3& operator*=(float f) {
 		buf[0] *= f;

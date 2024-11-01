@@ -130,11 +130,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="include\hittable_list.cpp" />
     <ClCompile Include="Ray Tracer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\color.hpp" />
+    <ClInclude Include="include\hittable.hpp" />
     <ClInclude Include="include\ray.hpp" />
+    <ClInclude Include="include\sphere.hpp" />
     <ClInclude Include="include\vec3.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

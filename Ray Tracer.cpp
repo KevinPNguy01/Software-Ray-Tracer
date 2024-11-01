@@ -25,6 +25,18 @@ Color ray_color(Ray r) {
         Vec3 N = unit_vector(r.at(t) - Vec3(0, 0, -1));
         return 0.5 * (N + Color(1, 1, 1));
     }
+    t = intersects_sphere(Point3(1, 0, -2), 0.5, r);
+    if (t > 0) {
+        Vec3 N = unit_vector(r.at(t) - Vec3(1, 0, -2));
+        return 0.5 * (N + Color(1, 1, 1));
+    }
+
+    t = intersects_sphere(Point3(0, -10, -1), 10, r);
+    if (t > 0) {
+        Vec3 N = unit_vector(r.at(t) - Vec3(0, -10, -1));
+        return 0.5 * (N + Color(1, 1, 1));
+    }
+
     Vec3 unit = unit_vector(r.direction());
     float a = 0.5 * (unit.y() + 1);
     return (1.0 - a) * Color(1, 1, 1) + a * Color(0.5, 0.7, 1);
@@ -74,9 +86,9 @@ int main() {
             ((DWORD*)bits)[y * image_width + x] = color_to_BGR(c);
         }
     }
+    BitBlt(GetDC(hwnd), 0, 0, image_width, image_height, hdcMem, 0, 0, SRCCOPY);
 
     while (true) {
-        BitBlt(GetDC(hwnd), 0, 0, image_width, image_height, hdcMem, 0, 0, SRCCOPY);
     }
     ReleaseDC(hwnd, hdcDest);
 }
