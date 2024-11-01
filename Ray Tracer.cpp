@@ -4,18 +4,26 @@
 #include "vec3.hpp"
 #include "ray.hpp"
 
-bool intersects_sphere(const Point3& center, float radius, const Ray& r) {
+float intersects_sphere(const Point3& center, float radius, const Ray& r) {
     Vec3 d = center - r.position();
-    float a = dot(r.direction(), r.direction());
-    float b = -2.0 * dot(r.direction(), d);
-    float c = dot(d, d) - radius * radius;
-    float discriminant = b * b - 4 * a * c;
-    return discriminant >= 0;
+    float a = r.direction().length_squared();
+    float h = dot(r.direction(), d);
+    float c = d.length_squared() - radius * radius;
+    float discriminant = h * h - a * c;
+
+    if (discriminant < 0) {
+        return -1.0;
+    }
+    else {
+        return (h - std::sqrt(discriminant)) / a;
+    }
 }
 
 Color ray_color(Ray r) {
-    if (intersects_sphere(Point3(0, 0, -1), 0.5, r)) {
-        return Color(1, 0, 0);
+    float t = intersects_sphere(Point3(0, 0, -1), 0.5, r);
+    if (t > 0) {
+        Vec3 N = unit_vector(r.at(t) - Vec3(0, 0, -1));
+        return 0.5 * (N + Color(1, 1, 1));
     }
     Vec3 unit = unit_vector(r.direction());
     float a = 0.5 * (unit.y() + 1);
