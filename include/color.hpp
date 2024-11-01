@@ -5,12 +5,8 @@
 
 using Color = Vec3;
 
-COLORREF RGBtoBGR(COLORREF color) {
-    BYTE red = GetRValue(color);
-    BYTE green = GetGValue(color);
-    BYTE blue = GetBValue(color);
-
-    return RGB(blue, green, red);
+inline COLORREF RGBtoBGR(COLORREF color) {
+    return RGB(GetBValue(color), GetGValue(color), GetRValue(color));
 }
 
 inline COLORREF color_to_BGR(const Color& c) {

@@ -132,9 +132,11 @@
   <ItemGroup>
     <ClCompile Include="include\hittable_list.hpp" />
     <ClCompile Include="Ray Tracer.cpp" />
+    <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\range.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\camera.hpp" />
     <ClInclude Include="include\color.hpp" />
     <ClInclude Include="include\hittable.hpp" />
     <ClInclude Include="include\range.hpp" />
