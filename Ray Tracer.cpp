@@ -9,6 +9,7 @@
 #include "vec3.hpp"
 #include "hittable_list.hpp"
 #include "sphere.hpp"
+#include "range.hpp"
 
 using std::make_shared;
 using std::shared_ptr;
@@ -22,7 +23,7 @@ inline double degrees_to_radians(double degrees) {
 
 Color ray_color(Ray r, HittableList& objects) {
     Hit hit;
-    if (objects.hit(r, 0, infinity, hit)) {
+    if (objects.hit(r, Range(0, infinity), hit)) {
         return 0.5 * (hit.normal + Color(1, 1, 1));
     }
     

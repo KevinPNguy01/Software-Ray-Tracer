@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ray.hpp"
+#include "range.hpp"
 
 class Hit {
 public:
@@ -20,5 +21,5 @@ public:
 
 class Hittable {
 public:
-	virtual bool hit(const Ray& r, float tmin, float tmax, Hit& hit) const = 0;
+	virtual bool hit(const Ray& r, Range range, Hit& hit) const = 0;
 };

@@ -10,7 +10,7 @@ private:
 public:
 	Sphere(const Point3& pos, float radius) : pos(pos), radius(abs(radius)) {}
 
-    bool hit(const Ray& r, float tmin, float tmax, Hit& hit) const override {
+    bool hit(const Ray& r, Range range, Hit& hit) const override {
         Vec3 d = pos - r.position();
         float a = r.direction().length_squared();
         float h = dot(r.direction(), d);
@@ -23,9 +23,9 @@ public:
 
         float sqrtd = sqrt(discriminant);
         float root = (h - sqrtd) / a;
-        if (root <= tmin || tmax <= root) {
+        if (!range.surrounds(root)) {
             root = (h + sqrtd) / a;
-            if (root <= tmin || tmax <= root) {
+            if (!range.surrounds(root)) {
                 return false;
             }
         }

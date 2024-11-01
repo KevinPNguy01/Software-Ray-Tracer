@@ -1,9 +1,10 @@
 #pragma once
 
-#include "hittable.hpp"
-
 #include <memory>
 #include <vector>
+
+#include "hittable.hpp"
+#include "range.hpp"
 
 using std::make_shared;
 using std::shared_ptr;
@@ -25,13 +26,13 @@ public:
 	}
 
 
-	bool hit(const Ray& r, float tmin, float tmax, Hit& hit_obj) const override {
+	bool hit(const Ray& r, Range range, Hit& hit_obj) const override {
 		Hit hit_temp;
 		bool did_hit = false;
-		float closest = tmax;
+		float closest = range.end;
 
 		for (const shared_ptr<Hittable>& object : objects) {
-			if (object->hit(r, tmin, closest, hit_temp)) {
+			if (object->hit(r, Range(range.start, closest), hit_temp)) {
 				did_hit = true;
 				closest = hit_temp.t;
 				hit_obj = hit_temp;
