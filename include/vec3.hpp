@@ -101,4 +101,4 @@ inline Vec3 unit_vector(const Vec3& v) {
 	return v / v.length();
 }
 
-using point3 = Vec3;
+using Point3 = Vec3;
