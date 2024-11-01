@@ -20,5 +20,5 @@ public:
 
 class Hittable {
 public:
-	virtual bool hit(const Ray& r, float tmin, float tmax, Hit& hit) const;
+	virtual bool hit(const Ray& r, float tmin, float tmax, Hit& hit) const = 0;
 };

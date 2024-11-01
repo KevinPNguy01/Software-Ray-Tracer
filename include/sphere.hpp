@@ -2,7 +2,7 @@
 
 #include "hittable.hpp"
 
-class Sphere : Hittable {
+class Sphere : public Hittable {
 private:
 	Point3 pos;
 	float radius;
@@ -10,7 +10,7 @@ private:
 public:
 	Sphere(const Point3& pos, float radius) : pos(pos), radius(abs(radius)) {}
 
-    bool hit(const Ray& r, float tmin, float tmax, Hit& hit) {
+    bool hit(const Ray& r, float tmin, float tmax, Hit& hit) const override {
         Vec3 d = pos - r.position();
         float a = r.direction().length_squared();
         float h = dot(r.direction(), d);

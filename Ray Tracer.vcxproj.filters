@@ -18,7 +18,7 @@
     <ClCompile Include="Ray Tracer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="include\hittable_list.cpp">
+    <ClCompile Include="include\hittable_list.hpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

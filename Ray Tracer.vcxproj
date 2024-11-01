@@ -130,7 +130,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="include\hittable_list.cpp" />
+    <ClCompile Include="include\hittable_list.hpp" />
     <ClCompile Include="Ray Tracer.cpp" />
   </ItemGroup>
   <ItemGroup>
