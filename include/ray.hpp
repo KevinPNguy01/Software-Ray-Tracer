@@ -10,10 +10,10 @@ private:
 public:
 	Ray(const Point3& pos, const Vec3& dir) : pos(pos), dir(dir) {}
 
-	const Point3& position() {
+	const Point3& position() const {
 		return pos;
 	}
-	const Vec3& direction() {
+	const Vec3& direction() const {
 		return dir;
 	}
 

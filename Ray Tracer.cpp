@@ -4,7 +4,19 @@
 #include "vec3.hpp"
 #include "ray.hpp"
 
+bool intersects_sphere(const Point3& center, float radius, const Ray& r) {
+    Vec3 d = center - r.position();
+    float a = dot(r.direction(), r.direction());
+    float b = -2.0 * dot(r.direction(), d);
+    float c = dot(d, d) - radius * radius;
+    float discriminant = b * b - 4 * a * c;
+    return discriminant >= 0;
+}
+
 Color ray_color(Ray r) {
+    if (intersects_sphere(Point3(0, 0, -1), 0.5, r)) {
+        return Color(1, 0, 0);
+    }
     Vec3 unit = unit_vector(r.direction());
     float a = 0.5 * (unit.y() + 1);
     return (1.0 - a) * Color(1, 1, 1) + a * Color(0.5, 0.7, 1);
