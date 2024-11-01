@@ -1,13 +1,7 @@
 #include <iostream>
 #include <Windows.h>
-
-COLORREF RGBtoBGR(COLORREF color) {
-    BYTE red = GetRValue(color);
-    BYTE green = GetGValue(color);
-    BYTE blue = GetBValue(color);
-
-    return RGB(blue, green, red);
-}
+#include "color.hpp"
+#include "vec3.hpp"
 
 int main() {
     int width = 256;
@@ -31,15 +25,8 @@ int main() {
 
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            double r = (double)x / width;
-            double g = (double)y / height;
-            double b = 0;
-
-            int ir = int(255 * r);
-            int ig = int(255 * g);
-            int ib = int(255 * b);
-
-            ((DWORD*)bits)[y * width + x] = RGBtoBGR(RGB(ir, ig, ib));
+            const color c = color((float)x / width, (float)y / height, 0);
+            ((DWORD*)bits)[y * width + x] = color_to_BGR(c);
         }
     }
 
