@@ -134,6 +134,7 @@
     <ClCompile Include="Ray Tracer.cpp" />
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\range.cpp" />
+    <ClCompile Include="src\util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\camera.hpp" />

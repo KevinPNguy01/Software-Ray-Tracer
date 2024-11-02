@@ -17,7 +17,7 @@ using std::shared_ptr;
 
 int main() {
     float aspect_ratio = 16.0 / 9;
-    int image_width = 1200;
+    int image_width = 800;
     int image_height = max(1, int(image_width / aspect_ratio));
 
     HWND hwnd = GetConsoleWindow();
@@ -38,7 +38,7 @@ int main() {
 
     HittableList world;
     world.add(make_shared<Sphere>(Point3(0, 0, -1), 0.5));
-    world.add(make_shared<Sphere>(Point3(0, -10000.5, -1), 10000));
+    world.add(make_shared<Sphere>(Point3(0, -100.5, -1), 100));
 
     Camera cam(Vec3(), image_width, aspect_ratio);
     cam.render(world, bits);

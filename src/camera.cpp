@@ -25,7 +25,7 @@ void Camera::render(const Hittable& world, void* bits) {
             Color c;
             for (int i = 0; i < samples_per_pixel; ++i) {
                 Ray r = get_ray(x, y);
-                c += ray_color(r, world);
+                c += ray_color(r, max_depth, world);
             }
             ((DWORD*)bits)[y * image_width + x] = color_to_BGR(c * pixel_samples_scale);
         }
@@ -39,10 +39,15 @@ Ray Camera::get_ray(int x, int y) {
     return Ray(pos, dir);
 }
 
-Color Camera::ray_color(const Ray& r, const Hittable& world) {
+Color Camera::ray_color(const Ray& r, int depth, const Hittable& world) {
+    if (depth <= 0) {
+        return Color();
+    }
+
     Hit hit;
-    if (world.hit(r, Range(0, std::numeric_limits<float>::infinity()), hit)) {
-        return 0.5 * (hit.normal + Color(1, 1, 1));
+    if (world.hit(r, Range(0.001, std::numeric_limits<float>::infinity()), hit)) {
+        Vec3 dir = random_on_hemisphere(hit.normal);
+        return 0.5 * ray_color(Ray(hit.p, dir), depth-1, world);
     }
     
     Vec3 unit = unit_vector(r.direction());

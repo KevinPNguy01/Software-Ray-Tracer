@@ -3,6 +3,8 @@
 #include <cmath>
 #include <iostream>
 
+#include "util.hpp"
+
 class Vec3 {
 public:
 	float buf[3];
@@ -56,6 +58,14 @@ public:
 	float length() const {
 		return std::sqrt(length_squared());
 	}
+
+	static Vec3 random() {
+		return Vec3(random_float(), random_float(), random_float());
+	}
+
+	static Vec3 random(float min, float max) {
+		return Vec3(random_float(min, max), random_float(min, max), random_float(min, max));
+	}
 };
 
 inline std::ostream& operator<<(std::ostream& out, const Vec3& v) {
@@ -100,6 +110,21 @@ inline Vec3 cross(const Vec3& v1, const Vec3& v2) {
 
 inline Vec3 unit_vector(const Vec3& v) {
 	return v / v.length();
+}
+
+inline Vec3 random_unit_vector() {
+	while (true) {
+		Vec3 p = Vec3::random(-1, 1);
+		float length_squared = p.length_squared();
+		if (1e-18 < length_squared && length_squared <= 1) {
+			return p / sqrt(length_squared);
+		}
+	}
+}
+
+inline Vec3 random_on_hemisphere(const Vec3& normal) {
+	Vec3 unit_vector = random_unit_vector();
+	return unit_vector * (dot(unit_vector, normal) > 0 ? 1 : -1);
 }
 
 using Point3 = Vec3;
