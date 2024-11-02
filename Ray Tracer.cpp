@@ -1,7 +1,6 @@
 #include <Windows.h>
 #include <cmath>
 #include <iostream>
-#include <limits>
 #include <memory>
 
 #include "color.hpp"
@@ -11,20 +10,14 @@
 #include "sphere.hpp"
 #include "range.hpp"
 #include "camera.hpp"
+#include "util.hpp"
 
 using std::make_shared;
 using std::shared_ptr;
 
-const float infinity = std::numeric_limits<float>::infinity();
-const float pi = 3.1415926535897932385;
-
-inline double degrees_to_radians(double degrees) {
-    return degrees * pi / 180.0;
-}
-
 int main() {
     float aspect_ratio = 16.0 / 9;
-    int image_width = 800;
+    int image_width = 1200;
     int image_height = max(1, int(image_width / aspect_ratio));
 
     HWND hwnd = GetConsoleWindow();
