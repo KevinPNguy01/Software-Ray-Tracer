@@ -17,7 +17,7 @@ using std::shared_ptr;
 
 int main() {
     float aspect_ratio = 16.0 / 9;
-    int image_width = 800;
+    int image_width = 400;
     int image_height = max(1, int(image_width / aspect_ratio));
 
     HWND hwnd = GetConsoleWindow();
