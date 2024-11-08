@@ -49,7 +49,7 @@ int main() {
     world.add(make_shared<Sphere>(Point3(-1, 0, -1), 0.5, blue));
     world.add(make_shared<Sphere>(Point3(0, -100.5, -1), 100, ground));
 
-    Camera cam(Vec3(), image_width, aspect_ratio);
+    Camera cam(Vec3(-2, 2, 1), image_width, aspect_ratio);
     cam.render(world, bits);
 
     BitBlt(GetDC(hwnd), 0, 0, image_width, image_height, hdcMem, 0, 0, SRCCOPY);
