@@ -4,7 +4,7 @@
 
 class Lambertian : public Material {
 public:
-	Lambertian(const Color& albedo) : albedo(albedo) {}
+	Lambertian(const Color& albedo) : Material(albedo) {}
 
 	bool scatter(const Ray& r, const Hit& hit, Color& attenuation, Ray& scattered) const override {
 		Vec3 dir = hit.normal + random_unit_vector();
@@ -16,7 +16,4 @@ public:
 		attenuation = albedo;
 		return true;
 	}
-
-protected:
-	Color albedo;
 };
