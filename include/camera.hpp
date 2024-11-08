@@ -17,7 +17,7 @@ private:
 	int image_width = 400;
 	int image_height;
 	int samples_per_pixel = 5;
-	int max_depth = 5;
+	int max_depth = 10;
 	float pixel_samples_scale;
 	Point3 pos;
 	Point3 pixel00_loc;

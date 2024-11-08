@@ -41,7 +41,7 @@ int main() {
     shared_ptr<Lambertian> ground = make_shared<Lambertian>(Color(0.5,0.5,0.5));
     shared_ptr<Lambertian> red = make_shared<Lambertian>(Color(1,0,0));
     shared_ptr<Lambertian> blue = make_shared<Lambertian>(Color(0,0,1));
-    shared_ptr<Metal> metal = make_shared<Metal>(Color(0.5, 0.5, 0.5));
+    shared_ptr<Metal> metal = make_shared<Metal>(Color(0.5, 0.5, 0.5), 0);
 
     HittableList world;
     world.add(make_shared<Sphere>(Point3(0, 0, -1.5), 0.5, metal));
