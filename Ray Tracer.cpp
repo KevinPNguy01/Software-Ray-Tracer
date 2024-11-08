@@ -11,13 +11,15 @@
 #include "range.hpp"
 #include "camera.hpp"
 #include "util.hpp"
+#include "metal.hpp"
+#include "lambertian.hpp"
 
 using std::make_shared;
 using std::shared_ptr;
 
 int main() {
     float aspect_ratio = 16.0 / 9;
-    int image_width = 400;
+    int image_width = 800;
     int image_height = max(1, int(image_width / aspect_ratio));
 
     HWND hwnd = GetConsoleWindow();
@@ -36,9 +38,16 @@ int main() {
     HDC hdcMem = CreateCompatibleDC(hdcDest);
     SelectObject(hdcMem, hBitmap);
 
+    shared_ptr<Lambertian> ground = make_shared<Lambertian>(Color(0.5,0.5,0.5));
+    shared_ptr<Lambertian> red = make_shared<Lambertian>(Color(1,0,0));
+    shared_ptr<Lambertian> blue = make_shared<Lambertian>(Color(0,0,1));
+    shared_ptr<Metal> metal = make_shared<Metal>(Color(0.5, 0.5, 0.5));
+
     HittableList world;
-    world.add(make_shared<Sphere>(Point3(0, 0, -1), 0.5));
-    world.add(make_shared<Sphere>(Point3(0, -100.5, -1), 100));
+    world.add(make_shared<Sphere>(Point3(0, 0, -1.5), 0.5, metal));
+    world.add(make_shared<Sphere>(Point3(1, 0, -1), 0.5, red));
+    world.add(make_shared<Sphere>(Point3(-1, 0, -1), 0.5, blue));
+    world.add(make_shared<Sphere>(Point3(0, -100.5, -1), 100, ground));
 
     Camera cam(Vec3(), image_width, aspect_ratio);
     cam.render(world, bits);

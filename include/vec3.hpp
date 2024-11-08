@@ -127,4 +127,8 @@ inline Vec3 random_on_hemisphere(const Vec3& normal) {
 	return unit_vector * (dot(unit_vector, normal) > 0 ? 1 : -1);
 }
 
+inline Vec3 reflect(const Vec3& v, const Vec3& n) {
+	return v - 2 * dot(v, n) * n;
+}
+
 using Point3 = Vec3;

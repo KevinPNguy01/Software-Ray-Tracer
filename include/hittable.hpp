@@ -1,12 +1,16 @@
 #pragma once
 
+#include <memory>
+
 #include "ray.hpp"
 #include "range.hpp"
+#include "material.hpp"
 
 class Hit {
 public:
 	Point3 p;
 	Vec3 normal;
+	std::shared_ptr<Material> mat;
 	float t;
 	bool front_face;
 

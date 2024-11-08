@@ -46,8 +46,12 @@ Color Camera::ray_color(const Ray& r, int depth, const Hittable& world) {
 
     Hit hit;
     if (world.hit(r, Range(0.001, std::numeric_limits<float>::infinity()), hit)) {
-        Vec3 dir = hit.normal + random_unit_vector();
-        return 0.5 * ray_color(Ray(hit.p, dir), depth-1, world);
+        Ray scattered;
+        Color attenuation;
+        if (hit.mat->scatter(r, hit, attenuation, scattered)) {
+            return attenuation * ray_color(scattered, depth-1, world);
+        }
+        return Color();
     }
     
     Vec3 unit = unit_vector(r.direction());

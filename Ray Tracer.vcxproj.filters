@@ -56,5 +56,14 @@
     <ClInclude Include="include\util.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\material.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lambertian.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\metal.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

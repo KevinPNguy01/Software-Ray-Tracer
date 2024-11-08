@@ -3,12 +3,8 @@
 #include "hittable.hpp"
 
 class Sphere : public Hittable {
-private:
-	Point3 pos;
-	float radius;
-
 public:
-	Sphere(const Point3& pos, float radius) : pos(pos), radius(abs(radius)) {}
+	Sphere(const Point3& pos, float radius, shared_ptr<Material> mat) : pos(pos), radius(abs(radius)), mat(mat) {}
 
     bool hit(const Ray& r, Range range, Hit& hit) const override {
         Vec3 d = pos - r.position();
@@ -33,7 +29,12 @@ public:
         hit.t = root;
         hit.p = r.at(hit.t);
         hit.set_face_normal(r, (hit.p - pos) / radius);
+        hit.mat = mat;
 
         return true;
     }
+private:
+    Point3 pos;
+    shared_ptr<Material> mat;
+    float radius;
 };
