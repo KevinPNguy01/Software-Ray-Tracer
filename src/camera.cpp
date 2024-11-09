@@ -100,7 +100,22 @@ void Camera::initialize() {
 }
 
 void Camera::increaseQuality() {
-    samples_per_pixel = min(20, samples_per_pixel + 1);
+    samples_per_pixel = min(100, samples_per_pixel * 2);
     max_depth = min(10, max_depth + 1);
     initialize();
+}
+
+void Camera::render_region(const Hittable& world, void* bits, int start_y, int end_y) {
+    for (int y = start_y; y < end_y; ++y) {
+        for (int x = 0; x < image_width; ++x) {
+            Vec3 pixel_center = pixel00_loc + x * pixel_dx + y * pixel_dy;
+            Vec3 ray_dir = pixel_center - look_from;
+            Color c;
+            for (int i = 0; i < samples_per_pixel; ++i) {
+                Ray r = get_ray(x, y);
+                c += ray_color(r, max_depth, world);
+            }
+            ((DWORD*)bits)[y * image_width + x] = color_to_BGR(correct_gamma(c * pixel_samples_scale));
+        }
+    }
 }

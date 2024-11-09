@@ -4,6 +4,7 @@
 #include <memory>
 #include <chrono>
 #include <thread>
+#include <atomic>
 
 #include "color.hpp"
 #include "ray.hpp"
@@ -21,6 +22,29 @@ using std::shared_ptr;
 
 const int FPS = 60;
 const std::chrono::milliseconds frameDuration(1000 / FPS);
+
+std::atomic<bool> restart_render(false);
+
+void handleInput(Camera& cam) {
+    if (GetKeyState('W') & 0x8000) {
+        cam.move(Camera::FORWARD, .1);
+    }
+    if (GetKeyState('A') & 0x8000) {
+        cam.move(Camera::LEFT, .1);
+    }
+    if (GetKeyState('S') & 0x8000) {
+        cam.move(Camera::BACKWARD, .1);
+    }
+    if (GetKeyState('D') & 0x8000) {
+        cam.move(Camera::RIGHT, .1);
+    }
+    if (GetKeyState(VK_SHIFT) & 0x8000) {
+        cam.move(Camera::DOWN, .1);
+    }
+    if (GetKeyState(VK_SPACE) & 0x8000) {
+        cam.move(Camera::UP, .1);
+    }
+}
 
 int main() {
     float aspect_ratio = 16.0 / 9;
@@ -54,7 +78,7 @@ int main() {
     world.add(make_shared<Sphere>(Point3(-1, 0, -1), 0.5, blue));
     world.add(make_shared<Sphere>(Point3(0, -100.5, -1), 100, ground));
 
-    Camera cam(Vec3(-2, 2, 1), image_width, aspect_ratio);
+    Camera cam(Vec3(0, 1, 1), image_width, aspect_ratio);
     cam.render(world, bits);
     BitBlt(GetDC(hwnd), 0, 0, image_width, image_height, hdcMem, 0, 0, SRCCOPY);
 
@@ -63,26 +87,18 @@ int main() {
         auto start = std::chrono::high_resolution_clock::now();
         auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(start - previous).count();
 
-        if (GetKeyState('W') & 0x8000) {
-            cam.move(Camera::FORWARD, .1);
+        handleInput(cam);
+
+        std::vector<std::thread> threads;
+        const int num_threads = 16;
+        int region_size = image_height / 16 + 1;
+        for (int i = 0; i < num_threads; ++i) {
+            threads.emplace_back(&Camera::render_region, &cam, std::ref(world), bits, i * region_size, min(image_height, (i + 1) * region_size));
         }
-        if (GetKeyState('A') & 0x8000) {
-            cam.move(Camera::LEFT, .1);
-        }
-        if (GetKeyState('S') & 0x8000) {
-            cam.move(Camera::BACKWARD, .1);
-        }
-        if (GetKeyState('D') & 0x8000) {
-            cam.move(Camera::RIGHT, .1);
-        }
-        if (GetKeyState(VK_SHIFT) & 0x8000) {
-            cam.move(Camera::DOWN, .1);
-        }
-        if (GetKeyState(VK_SPACE) & 0x8000) {
-            cam.move(Camera::UP, .1);
+        for (auto& thread : threads) {
+            thread.join();
         }
 
-        cam.render(world, bits);
         BitBlt(GetDC(hwnd), 0, 0, image_width, image_height, hdcMem, 0, 0, SRCCOPY);
         cam.increaseQuality();
 

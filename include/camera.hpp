@@ -14,6 +14,8 @@ public:
 
 	void render(const Hittable& world, void* bits);
 
+	void render_region(const Hittable& world, void* bits, int start_y, int end_y);
+
 	void initialize();
 
 	void move(direction dir, float amount);
