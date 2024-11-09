@@ -13,11 +13,9 @@ public:
 
 	std::atomic<bool> restart_render;
 
-	static enum direction {UP, DOWN, LEFT, RIGHT, FORWARD, BACKWARD};
+	static enum direction {FORWARD, LEFT, BACKWARD, RIGHT, UP, DOWN};
 
 	Camera(Vec3 look_from, int image_width, float aspect_ratio);
-
-	void render(const Hittable& world, void* bits);
 
 	void render_region(const Hittable& world, void* bits, int start_y, int end_y);
 

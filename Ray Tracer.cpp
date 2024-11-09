@@ -20,37 +20,20 @@
 using std::make_shared;
 using std::shared_ptr;
 
-const int FPS = 60;
-const std::chrono::milliseconds frameDuration(1000 / FPS);
+constexpr int FPS = 60;
+constexpr std::chrono::milliseconds frameDuration(1000 / FPS);
 
-std::atomic<bool> awaiting_input(true);
-std::atomic<bool> input_flags[6];
+std::atomic<bool> input_flags[6];           // Flags indicating a key was held down during a frame.
 
 void handleInput(Camera& cam) {
-    while (awaiting_input.load()) {
-        if (GetAsyncKeyState('W') & 0x8000) {
-            input_flags[0].store(true);
-            cam.restart_render.store(true);
-        }
-        if (GetAsyncKeyState('A') & 0x8000) {
-            input_flags[1].store(true);
-            cam.restart_render.store(true);
-        }
-        if (GetAsyncKeyState('S') & 0x8000) {
-            input_flags[2].store(true);
-            cam.restart_render.store(true);
-        }
-        if (GetAsyncKeyState('D') & 0x8000) {
-            input_flags[3].store(true);
-            cam.restart_render.store(true);
-        }
-        if (GetAsyncKeyState(VK_SPACE) & 0x8000) {
-            input_flags[4].store(true);
-            cam.restart_render.store(true);
-        }
-        if (GetAsyncKeyState(VK_SHIFT) & 0x8000) {
-            input_flags[5].store(true);
-            cam.restart_render.store(true);
+    constexpr char keys[] = { 'W', 'A', 'S', 'D', VK_SPACE, VK_SHIFT };
+    while (1) {
+        // Raise flags for each of the keys that were held down during a frame.
+        for (int i = 0; i < 6; ++i) {
+            if (GetAsyncKeyState(keys[i]) & 0x8000) {
+                input_flags[i].store(true);
+                cam.restart_render.store(true);
+            }
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
@@ -91,59 +74,36 @@ int main() {
     world.add(make_shared<Sphere>(Point3(0, -100.5, -1), 100, ground));
 
     Camera cam(Vec3(0, 1, 1), image_width, aspect_ratio);
-    cam.render(world, bits);
     BitBlt(GetDC(hwnd), 0, 0, image_width, image_height, hdcMem, 0, 0, SRCCOPY);
 
     auto previous = std::chrono::high_resolution_clock::now();
+    std::thread inputThread(handleInput, std::ref(cam));
     while (true) {
         auto start = std::chrono::high_resolution_clock::now();
         auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(start - previous).count();
 
-        std::thread inputThread(handleInput, std::ref(cam));
-
-        std::vector<std::thread> threads;
+        // Render regions of the screen in separate threads.
         const int num_threads = 16;
         int region_size = image_height / 16 + 1;
+        std::vector<std::thread> threads;
         for (int i = 0; i < num_threads; ++i) {
             threads.emplace_back(&Camera::render_region, &cam, std::ref(world), bits, i * region_size, min(image_height, (i + 1) * region_size));
         }
         for (auto& thread : threads) {
             thread.join();
         }
-        awaiting_input.store(false);
-        inputThread.join();
-        awaiting_input.store(true);
-
         
         if (!cam.restart_render.load() || cam.samples_per_pixel == 1) {
             BitBlt(GetDC(hwnd), 0, 0, image_width, image_height, hdcMem, 0, 0, SRCCOPY);
         }
-        if (cam.restart_render.load()) {
-            cam.resetQuality();
-        }
-        else {
-            cam.increaseQuality();
-        }
+        cam.restart_render.load() ? cam.resetQuality() : cam.increaseQuality();
         cam.restart_render.store(false);
-        if (input_flags[0].load()) {
-            cam.move(Camera::FORWARD, 0.1);
-        }
-        if (input_flags[1].load()) {
-            cam.move(Camera::LEFT, 0.1);
-        }
-        if (input_flags[2].load()) {
-            cam.move(Camera::BACKWARD, 0.1);
-        }
-        if (input_flags[3].load()) {
-            cam.move(Camera::RIGHT, 0.1);
-        }
-        if (input_flags[4].load()) {
-            cam.move(Camera::UP, 0.1);
-        }
-        if (input_flags[5].load()) {
-            cam.move(Camera::DOWN, 0.1);
-        }
+
+        // Iterate through the input flags and move camera accordingly.
         for (int i = 0; i < 6; ++i) {
+            if (input_flags[i].load()) {
+                cam.move(static_cast<Camera::direction>(i), 0.1);
+            }
             input_flags[i].store(false);
         }
 

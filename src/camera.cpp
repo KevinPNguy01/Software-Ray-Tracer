@@ -4,21 +4,6 @@ Camera::Camera(Vec3 look_from, int image_width, float aspect_ratio) : look_from(
     initialize();
 }
 
-void Camera::render(const Hittable& world, void* bits) {
-    for (int y = 0; y < image_height; ++y) {
-        for (int x = 0; x < image_width; ++x) {
-            Vec3 pixel_center = pixel00_loc + x * pixel_dx + y * pixel_dy;
-            Vec3 ray_dir = pixel_center - look_from;
-            Color c;
-            for (int i = 0; i < samples_per_pixel; ++i) {
-                Ray r = get_ray(x, y);
-                c += ray_color(r, max_depth, world);
-            }
-            ((DWORD*)bits)[y * image_width + x] = color_to_BGR(correct_gamma(c * pixel_samples_scale));
-        }
-    }
-}
-
 Ray Camera::get_ray(int x, int y) {
     float offset_x = random_float() - 0.5;
     float offset_y = random_float() - 0.5;
