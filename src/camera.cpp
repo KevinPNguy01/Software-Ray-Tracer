@@ -55,7 +55,6 @@ void Camera::move(direction dir, float amount) {
     }
 
     look_from += delta * amount;
-    look_at += delta * amount;
     initialize();
 }
 
@@ -63,14 +62,20 @@ void Camera::initialize() {
     image_height = max(1, int(image_width / aspect_ratio));
     pixel_samples_scale = 1.0 / samples_per_pixel;
 
-    float focal_length = (look_from - look_at).length();
+    float focal_length = 1;
     float theta = degrees_to_radians(vfov);
     float h = tan(theta / 2);
     float viewport_height = 2 * h * focal_length;
     float viewport_width = viewport_height * ((float)image_width / image_height);
 
-    w = unit_vector(look_from - look_at);
-    u = unit_vector(cross(vup, w));
+    Vec3 forward(
+        cos(degrees_to_radians(yaw)) * cos(degrees_to_radians(pitch)),
+        sin(degrees_to_radians(pitch)),
+        sin(degrees_to_radians(yaw)) * cos(degrees_to_radians(pitch))
+    );
+
+    w = unit_vector(forward);
+    u = cross(Vec3(0, 1, 0), w);
     v = cross(w, u);
 
     Vec3 viewport_x = viewport_width * u;
@@ -109,4 +114,14 @@ void Camera::render_region(const Hittable& world, void* bits, int start_y, int e
             ((DWORD*)bits)[y * image_width + x] = color_to_BGR(correct_gamma(c * pixel_samples_scale));
         }
     }
+}
+
+void Camera::rotate_yaw(float angle) {
+    yaw += angle;
+    initialize();
+}
+
+void Camera::rotate_pitch(float angle) {
+    pitch += angle;
+    initialize();
 }

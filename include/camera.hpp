@@ -22,6 +22,8 @@ public:
 	void initialize();
 
 	void move(direction dir, float amount);
+	void rotate_yaw(float angle);
+	void rotate_pitch(float angle);
 
 	void increaseQuality();
 	void resetQuality();
@@ -34,8 +36,10 @@ private:
 	float pixel_samples_scale;
 	float vfov = 70;
 
+	float yaw = 0;
+	float pitch = 0;
+
 	Point3 look_from;
-	Point3 look_at = Point3(0, 0, -1);
 	Vec3 vup = Vec3(0, 1, 0);
 
 	Point3 pixel00_loc;

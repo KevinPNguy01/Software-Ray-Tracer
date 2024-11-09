@@ -24,10 +24,41 @@ constexpr int FPS = 60;
 constexpr std::chrono::milliseconds frameDuration(1000 / FPS);
 
 std::atomic<bool> input_flags[6];           // Flags indicating a key was held down during a frame.
+std::atomic<bool> mouse_flag(false);
+POINT lastMousePos;
+int dx, dy;
+
+float aspect_ratio = 16.0 / 9;
+int image_width = 800;
+int image_height = max(1, int(image_width / aspect_ratio));
+
+void handleMouseMovement(Camera& cam) {
+    POINT currentMousePos;
+    GetCursorPos(&currentMousePos);
+
+    // Calculate the difference in cursor position
+    dx = currentMousePos.x - lastMousePos.x;
+    dy = currentMousePos.y - lastMousePos.y;
+
+    // Store the current position for the next frame
+    lastMousePos = currentMousePos;
+
+    if (dx != 0 && dy != 0) {
+        cam.restart_render.store(true);
+        mouse_flag.store(true);
+    }
+}
+
+void centerMouse(HWND hwnd) {
+    POINT center = { image_width / 2, image_height / 2 };
+    ClientToScreen(hwnd, &center);
+    SetCursorPos(center.x, center.y);
+}
 
 void handleInput(Camera& cam) {
     constexpr char keys[] = { 'W', 'A', 'S', 'D', VK_SPACE, VK_SHIFT };
     while (1) {
+        handleMouseMovement(cam);
         // Raise flags for each of the keys that were held down during a frame.
         for (int i = 0; i < 6; ++i) {
             if (GetAsyncKeyState(keys[i]) & 0x8000) {
@@ -39,13 +70,21 @@ void handleInput(Camera& cam) {
     }
 }
 
-int main() {
-    float aspect_ratio = 16.0 / 9;
-    int image_width = 800;
-    int image_height = max(1, int(image_width / aspect_ratio));
+void ShowConsoleCursor(bool showFlag)
+{
+    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
 
+    CONSOLE_CURSOR_INFO     cursorInfo;
+
+    GetConsoleCursorInfo(out, &cursorInfo);
+    cursorInfo.bVisible = showFlag; // set the cursor visibility
+    SetConsoleCursorInfo(out, &cursorInfo);
+}
+
+int main() {
     HWND hwnd = GetConsoleWindow();
     HDC hdcDest = GetDC(GetConsoleWindow());
+    ShowConsoleCursor(false);
 
     BITMAPINFO bmi = {};
     bmi.bmiHeader.biSize = sizeof(bmi.bmiHeader);
@@ -79,6 +118,8 @@ int main() {
     auto previous = std::chrono::high_resolution_clock::now();
     std::thread inputThread(handleInput, std::ref(cam));
     while (true) {
+        while (ShowCursor(FALSE) >= 0);
+
         auto start = std::chrono::high_resolution_clock::now();
         auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(start - previous).count();
 
@@ -106,6 +147,14 @@ int main() {
             }
             input_flags[i].store(false);
         }
+
+        // Translate mouse movement to camera rotation
+        const float sensitivity = 0.25f; // Adjust sensitivity as needed
+        cam.rotate_yaw(dx * sensitivity);  // Horizontal movement affects yaw
+        cam.rotate_pitch(dy * sensitivity); // Vertical movement affects pitch
+        cam.initialize();
+        centerMouse(hwnd);
+        mouse_flag.store(false);
 
         previous = start;
         std::this_thread::sleep_for(frameDuration);
