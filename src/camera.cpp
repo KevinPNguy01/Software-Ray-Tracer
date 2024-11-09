@@ -1,26 +1,7 @@
 #include "camera.hpp"
 
-Camera::Camera(Vec3 pos, int image_width, float aspect_ratio) : look_from(pos), image_width(image_width), aspect_ratio(aspect_ratio) {
-    image_height = max(1, int(image_width / aspect_ratio));
-    pixel_samples_scale = 1.0 / samples_per_pixel;
-
-    float focal_length = (look_from - look_at).length();
-    float theta = degrees_to_radians(vfov);
-    float h = tan(theta / 2);
-    float viewport_height = 2 * h * focal_length;
-    float viewport_width = viewport_height * ((float)image_width / image_height);
-
-    Vec3 w = unit_vector(look_from - look_at);
-    Vec3 u = unit_vector(cross(vup, w));
-    Vec3 v = cross(w, u);
-
-    Vec3 viewport_x = viewport_width * u;
-    Vec3 viewport_y = -viewport_height * v;
-    pixel_dx = viewport_x / image_width;
-    pixel_dy = viewport_y / image_height;
-
-    Vec3 viewport_upper_left = pos - viewport_x / 2 - viewport_y / 2 - focal_length * w;
-    pixel00_loc = viewport_upper_left + 0.5 * (pixel_dx + pixel_dy);
+Camera::Camera(Vec3 look_from, int image_width, float aspect_ratio) : look_from(look_from), image_width(image_width), aspect_ratio(aspect_ratio) {
+    initialize();
 }
 
 void Camera::render(const Hittable& world, void* bits) {
@@ -63,4 +44,63 @@ Color Camera::ray_color(const Ray& r, int depth, const Hittable& world) {
     Vec3 unit = unit_vector(r.direction());
     float a = 0.5 * (unit.y() + 1);
     return (1.0 - a) * Color(1, 1, 1) + a * Color(0.5, 0.7, 1);
+}
+
+void Camera::move(direction dir, float amount) {
+    Vec3 delta;
+    switch (dir) {
+    case UP:
+        delta = Vec3(0, 1, 0);
+        break;
+    case DOWN:
+        delta = Vec3(0, -1, 0);
+        break;
+    case LEFT:
+        delta = -u;
+        break;
+    case RIGHT:
+        delta = u;
+        break;
+    case FORWARD:
+        delta = unit_vector(-w * Vec3(1, 0, 1));
+        break;
+    case BACKWARD:
+        delta = unit_vector(w * Vec3(1, 0, 1));
+        break;
+    }
+    samples_per_pixel = 1;
+    max_depth = 2;
+
+    look_from += delta * amount;
+    look_at += delta * amount;
+    initialize();
+}
+
+void Camera::initialize() {
+    image_height = max(1, int(image_width / aspect_ratio));
+    pixel_samples_scale = 1.0 / samples_per_pixel;
+
+    float focal_length = (look_from - look_at).length();
+    float theta = degrees_to_radians(vfov);
+    float h = tan(theta / 2);
+    float viewport_height = 2 * h * focal_length;
+    float viewport_width = viewport_height * ((float)image_width / image_height);
+
+    w = unit_vector(look_from - look_at);
+    u = unit_vector(cross(vup, w));
+    v = cross(w, u);
+
+    Vec3 viewport_x = viewport_width * u;
+    Vec3 viewport_y = -viewport_height * v;
+    pixel_dx = viewport_x / image_width;
+    pixel_dy = viewport_y / image_height;
+
+    Vec3 viewport_upper_left = look_from - viewport_x / 2 - viewport_y / 2 - focal_length * w;
+    pixel00_loc = viewport_upper_left + 0.5 * (pixel_dx + pixel_dy);
+}
+
+void Camera::increaseQuality() {
+    samples_per_pixel = min(20, samples_per_pixel + 1);
+    max_depth = min(10, max_depth + 1);
+    initialize();
 }
