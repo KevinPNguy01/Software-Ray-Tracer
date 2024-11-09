@@ -1,6 +1,6 @@
 #include "camera.hpp"
 
-Camera::Camera(Vec3 look_from, int image_width, float aspect_ratio) : look_from(look_from), image_width(image_width), aspect_ratio(aspect_ratio) {
+Camera::Camera(Vec3 look_from, int image_width, float aspect_ratio) : look_from(look_from), image_width(image_width), aspect_ratio(aspect_ratio), restart_render(false) {
     initialize();
 }
 
@@ -68,8 +68,6 @@ void Camera::move(direction dir, float amount) {
         delta = unit_vector(w * Vec3(1, 0, 1));
         break;
     }
-    samples_per_pixel = 1;
-    max_depth = 2;
 
     look_from += delta * amount;
     look_at += delta * amount;
@@ -100,14 +98,22 @@ void Camera::initialize() {
 }
 
 void Camera::increaseQuality() {
-    samples_per_pixel = min(100, samples_per_pixel * 2);
-    max_depth = min(10, max_depth + 1);
+    samples_per_pixel = min(512, samples_per_pixel * 2);
+    max_depth = min(20, max_depth + 2);
     initialize();
+}
+
+void Camera::resetQuality() {
+    samples_per_pixel = 1;
+    max_depth = 2;
 }
 
 void Camera::render_region(const Hittable& world, void* bits, int start_y, int end_y) {
     for (int y = start_y; y < end_y; ++y) {
         for (int x = 0; x < image_width; ++x) {
+            if (restart_render.load() && samples_per_pixel > 1) {
+                return;
+            }
             Vec3 pixel_center = pixel00_loc + x * pixel_dx + y * pixel_dy;
             Vec3 ray_dir = pixel_center - look_from;
             Color c;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <limits>
+#include <atomic>
 
 #include "hittable.hpp"
 #include "color.hpp"
@@ -8,6 +9,10 @@
 
 class Camera {
 public:
+	int samples_per_pixel = 1;
+
+	std::atomic<bool> restart_render;
+
 	static enum direction {UP, DOWN, LEFT, RIGHT, FORWARD, BACKWARD};
 
 	Camera(Vec3 look_from, int image_width, float aspect_ratio);
@@ -21,12 +26,12 @@ public:
 	void move(direction dir, float amount);
 
 	void increaseQuality();
+	void resetQuality();
 
 private:
 	float aspect_ratio = 1;
 	int image_width = 400;
 	int image_height;
-	int samples_per_pixel = 1;
 	int max_depth = 2;
 	float pixel_samples_scale;
 	float vfov = 70;

@@ -23,26 +23,36 @@ using std::shared_ptr;
 const int FPS = 60;
 const std::chrono::milliseconds frameDuration(1000 / FPS);
 
-std::atomic<bool> restart_render(false);
+std::atomic<bool> awaiting_input(true);
+std::atomic<bool> input_flags[6];
 
 void handleInput(Camera& cam) {
-    if (GetKeyState('W') & 0x8000) {
-        cam.move(Camera::FORWARD, .1);
-    }
-    if (GetKeyState('A') & 0x8000) {
-        cam.move(Camera::LEFT, .1);
-    }
-    if (GetKeyState('S') & 0x8000) {
-        cam.move(Camera::BACKWARD, .1);
-    }
-    if (GetKeyState('D') & 0x8000) {
-        cam.move(Camera::RIGHT, .1);
-    }
-    if (GetKeyState(VK_SHIFT) & 0x8000) {
-        cam.move(Camera::DOWN, .1);
-    }
-    if (GetKeyState(VK_SPACE) & 0x8000) {
-        cam.move(Camera::UP, .1);
+    while (awaiting_input.load()) {
+        if (GetAsyncKeyState('W') & 0x8000) {
+            input_flags[0].store(true);
+            cam.restart_render.store(true);
+        }
+        if (GetAsyncKeyState('A') & 0x8000) {
+            input_flags[1].store(true);
+            cam.restart_render.store(true);
+        }
+        if (GetAsyncKeyState('S') & 0x8000) {
+            input_flags[2].store(true);
+            cam.restart_render.store(true);
+        }
+        if (GetAsyncKeyState('D') & 0x8000) {
+            input_flags[3].store(true);
+            cam.restart_render.store(true);
+        }
+        if (GetAsyncKeyState(VK_SPACE) & 0x8000) {
+            input_flags[4].store(true);
+            cam.restart_render.store(true);
+        }
+        if (GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+            input_flags[5].store(true);
+            cam.restart_render.store(true);
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 }
 
@@ -67,15 +77,17 @@ int main() {
     HDC hdcMem = CreateCompatibleDC(hdcDest);
     SelectObject(hdcMem, hBitmap);
 
-    shared_ptr<Lambertian> ground = make_shared<Lambertian>(Color(0.5,0.5,0.5));
-    shared_ptr<Lambertian> red = make_shared<Lambertian>(Color(1,0,0));
-    shared_ptr<Lambertian> blue = make_shared<Lambertian>(Color(0,0,1));
-    shared_ptr<Metal> metal = make_shared<Metal>(Color(0.5, 0.5, 0.5), 0);
+    shared_ptr<Lambertian> ground = make_shared<Lambertian>(Color(0.7, 0.7, 0.7));
+    shared_ptr<Lambertian> purple = make_shared<Lambertian>(Color(0.803921568627451, 0.7058823529411765, 0.8588235294117647));
+    shared_ptr<Lambertian> pink = make_shared<Lambertian>(Color(1, 0.7843137254901961, 0.8666666666666667));
+    shared_ptr<Lambertian> dark_pink = make_shared<Lambertian>(Color(1, 0.6862745098039216, 0.8));
+    shared_ptr<Metal> metal = make_shared<Metal>(Color(0.7411764705882353, 0.8784313725490196, 0.996078431372549), 0);
 
     HittableList world;
     world.add(make_shared<Sphere>(Point3(0, 0, -1.5), 0.5, metal));
-    world.add(make_shared<Sphere>(Point3(1, 0, -1), 0.5, red));
-    world.add(make_shared<Sphere>(Point3(-1, 0, -1), 0.5, blue));
+    world.add(make_shared<Sphere>(Point3(1, 0, -1), 0.5, pink));
+    world.add(make_shared<Sphere>(Point3(-1, 0, -1), 0.5, purple));
+    world.add(make_shared<Sphere>(Point3(-0.25, -0.4, -0.75), 0.1, dark_pink));
     world.add(make_shared<Sphere>(Point3(0, -100.5, -1), 100, ground));
 
     Camera cam(Vec3(0, 1, 1), image_width, aspect_ratio);
@@ -87,7 +99,7 @@ int main() {
         auto start = std::chrono::high_resolution_clock::now();
         auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(start - previous).count();
 
-        handleInput(cam);
+        std::thread inputThread(handleInput, std::ref(cam));
 
         std::vector<std::thread> threads;
         const int num_threads = 16;
@@ -98,9 +110,42 @@ int main() {
         for (auto& thread : threads) {
             thread.join();
         }
+        awaiting_input.store(false);
+        inputThread.join();
+        awaiting_input.store(true);
 
-        BitBlt(GetDC(hwnd), 0, 0, image_width, image_height, hdcMem, 0, 0, SRCCOPY);
-        cam.increaseQuality();
+        
+        if (!cam.restart_render.load() || cam.samples_per_pixel == 1) {
+            BitBlt(GetDC(hwnd), 0, 0, image_width, image_height, hdcMem, 0, 0, SRCCOPY);
+        }
+        if (cam.restart_render.load()) {
+            cam.resetQuality();
+        }
+        else {
+            cam.increaseQuality();
+        }
+        cam.restart_render.store(false);
+        if (input_flags[0].load()) {
+            cam.move(Camera::FORWARD, 0.1);
+        }
+        if (input_flags[1].load()) {
+            cam.move(Camera::LEFT, 0.1);
+        }
+        if (input_flags[2].load()) {
+            cam.move(Camera::BACKWARD, 0.1);
+        }
+        if (input_flags[3].load()) {
+            cam.move(Camera::RIGHT, 0.1);
+        }
+        if (input_flags[4].load()) {
+            cam.move(Camera::UP, 0.1);
+        }
+        if (input_flags[5].load()) {
+            cam.move(Camera::DOWN, 0.1);
+        }
+        for (int i = 0; i < 6; ++i) {
+            input_flags[i].store(false);
+        }
 
         previous = start;
         std::this_thread::sleep_for(frameDuration);
