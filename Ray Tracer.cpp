@@ -18,6 +18,7 @@
 #include "util.hpp"
 #include "metal.hpp"
 #include "lambertian.hpp"
+#include "dielectric.hpp"
 
 using std::make_shared;
 using std::shared_ptr;
@@ -148,7 +149,7 @@ int main() {
     SelectObject(hdcMem, hBitmap);
 
     shared_ptr<Lambertian> ground = make_shared<Lambertian>(Color(0.7, 0.7, 0.7));
-    shared_ptr<Lambertian> purple = make_shared<Lambertian>(Color(0.803921568627451, 0.7058823529411765, 0.8588235294117647));
+    shared_ptr<Dielectric> purple = make_shared<Dielectric>(Color(1,1,1), 1/1.5);
     shared_ptr<Lambertian> pink = make_shared<Lambertian>(Color(1, 0.7843137254901961, 0.8666666666666667));
     shared_ptr<Lambertian> dark_pink = make_shared<Lambertian>(Color(1, 0.6862745098039216, 0.8));
     shared_ptr<Metal> metal = make_shared<Metal>(Color(0.9, 0.9, 0.9), 0.01);

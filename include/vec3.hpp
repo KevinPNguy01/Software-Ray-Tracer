@@ -131,4 +131,11 @@ inline Vec3 reflect(const Vec3& v, const Vec3& n) {
 	return v - 2 * dot(v, n) * n;
 }
 
+inline Vec3 refract(const Vec3& v, const Vec3& n, float refract_ratio) {
+	float cos_theta = std::fmin(dot(-v, n), 1.0f);
+	Vec3 perpendicular = refract_ratio * (v + cos_theta * n);
+	Vec3 parallel = -std::sqrt(std::abs(1.0 - perpendicular.length_squared())) * n;
+	return perpendicular + parallel;
+}
+
 using Point3 = Vec3;
