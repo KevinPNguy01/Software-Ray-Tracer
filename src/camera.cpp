@@ -107,11 +107,22 @@ void Camera::render_region(const Hittable& world, void* bits, int start_y, int e
             Vec3 pixel_center = pixel00_loc + x * pixel_dx + y * pixel_dy;
             Vec3 ray_dir = pixel_center - look_from;
             Color c;
-            for (int i = 0; i < samples_per_pixel; ++i) {
+            for (int i = 0; i < samples_per_pixel / (samples_per_pixel == 1 ? 1 : 2); ++i) {
                 Ray r = get_ray(x, y);
                 c += ray_color(r, max_depth, world);
             }
-            ((DWORD*)bits)[y * image_width + x] = color_to_BGR(correct_gamma(c * pixel_samples_scale));
+            if (samples_per_pixel != 1) {
+                COLORREF colorRef = ((DWORD*)bits)[y * image_width + x];
+                float red = static_cast<float>(GetRValue(colorRef)) / 255.0f;
+                float green = static_cast<float>(GetGValue(colorRef)) / 255.0f;
+                float blue = static_cast<float>(GetBValue(colorRef)) / 255.0f;
+                Color prevCol(blue, green, red);
+                ((DWORD*)bits)[y * image_width + x] = color_to_BGR(prevCol / 2 + correct_gamma(c * pixel_samples_scale) * sqrt(2) / 2);
+            }
+            else {
+                ((DWORD*)bits)[y * image_width + x] = color_to_BGR(correct_gamma(c * pixel_samples_scale));
+            }
+            
         }
     }
 }
