@@ -88,8 +88,8 @@ void Camera::initialize() {
 }
 
 void Camera::increaseQuality() {
-    samples_per_pixel = min(512, samples_per_pixel * 2);
-    max_depth = min(20, max_depth + 2);
+    samples_per_pixel = min(2048, samples_per_pixel * 2);
+    max_depth = min(24, max_depth + 2);
     initialize();
 }
 

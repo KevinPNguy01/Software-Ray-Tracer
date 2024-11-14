@@ -1,3 +1,5 @@
+#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+
 #include <Windows.h>
 #include <cmath>
 #include <iostream>
@@ -25,6 +27,8 @@ constexpr std::chrono::milliseconds frameDuration(1000 / FPS);
 
 std::atomic<bool> input_flags[6];           // Flags indicating a key was held down during a frame.
 std::atomic<bool> mouse_flag(false);
+boolean inFocus = true;
+boolean escapeKeyState = false;
 POINT lastMousePos;
 int dx, dy;
 
@@ -32,7 +36,22 @@ float aspect_ratio = 16.0 / 9;
 int image_width = 800;
 int image_height = max(1, int(image_width / aspect_ratio));
 
-void handleMouseMovement(Camera& cam) {
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    switch (uMsg) {
+    case WM_DESTROY:
+        PostQuitMessage(0);
+        return 0;
+    }
+    return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
+void centerMouse(HWND hwnd) {
+    POINT center = { image_width / 2, image_height / 2 };
+    ClientToScreen(hwnd, &center);
+    SetCursorPos(center.x, center.y);
+}
+
+void handleMouseMovement(Camera& cam, HWND hwnd) {
     POINT currentMousePos;
     GetCursorPos(&currentMousePos);
 
@@ -49,16 +68,25 @@ void handleMouseMovement(Camera& cam) {
     }
 }
 
-void centerMouse(HWND hwnd) {
-    POINT center = { image_width / 2, image_height / 2 };
-    ClientToScreen(hwnd, &center);
-    SetCursorPos(center.x, center.y);
-}
-
-void handleInput(Camera& cam) {
+void handleInput(Camera& cam, HWND hwnd) {
     constexpr char keys[] = { 'W', 'A', 'S', 'D', VK_SPACE, VK_SHIFT };
     while (1) {
-        handleMouseMovement(cam);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+        // Unfocus window by pressing escape.
+        if ((GetAsyncKeyState(VK_ESCAPE) & 0x8000) != 0) {
+            if (!escapeKeyState) {
+                escapeKeyState = true;
+                inFocus = !inFocus;
+                if (inFocus) centerMouse(hwnd);
+            }
+        }
+        else {
+            escapeKeyState = false;
+        }
+        if (!inFocus) continue;
+
+        handleMouseMovement(cam, hwnd);
         // Raise flags for each of the keys that were held down during a frame.
         for (int i = 0; i < 6; ++i) {
             if (GetAsyncKeyState(keys[i]) & 0x8000) {
@@ -66,7 +94,6 @@ void handleInput(Camera& cam) {
                 cam.restart_render.store(true);
             }
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 }
 
@@ -82,8 +109,29 @@ void ShowConsoleCursor(bool showFlag)
 }
 
 int main() {
-    HWND hwnd = GetConsoleWindow();
-    HDC hdcDest = GetDC(GetConsoleWindow());
+    const wchar_t CLASS_NAME[] = L"Realtime Raytracer";
+    WNDCLASS wc = { };
+    wc.lpfnWndProc = WindowProc;
+    wc.hInstance = GetModuleHandle(NULL);
+    wc.lpszClassName = CLASS_NAME;
+
+    RegisterClass(&wc);
+
+    RECT rect = { 0, 0, image_width, image_height };
+    AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
+
+    HWND hwnd = CreateWindowEx(
+        0,
+        CLASS_NAME,
+        L"Realtime Raytracer",
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT, rect.right - rect.left, rect.bottom - rect.top,
+        NULL, NULL, wc.hInstance, NULL
+    );
+    ShowWindow(hwnd, SW_SHOW);
+    ShowCursor(FALSE);
+
+    HDC hdcDest = GetDC(hwnd);
     ShowConsoleCursor(false);
 
     BITMAPINFO bmi = {};
@@ -103,7 +151,7 @@ int main() {
     shared_ptr<Lambertian> purple = make_shared<Lambertian>(Color(0.803921568627451, 0.7058823529411765, 0.8588235294117647));
     shared_ptr<Lambertian> pink = make_shared<Lambertian>(Color(1, 0.7843137254901961, 0.8666666666666667));
     shared_ptr<Lambertian> dark_pink = make_shared<Lambertian>(Color(1, 0.6862745098039216, 0.8));
-    shared_ptr<Metal> metal = make_shared<Metal>(Color(0.7411764705882353, 0.8784313725490196, 0.996078431372549), 0);
+    shared_ptr<Metal> metal = make_shared<Metal>(Color(0.9, 0.9, 0.9), 0.01);
 
     HittableList world;
     world.add(make_shared<Sphere>(Point3(0, 0, -1.5), 0.5, metal));
@@ -116,8 +164,19 @@ int main() {
     BitBlt(GetDC(hwnd), 0, 0, image_width, image_height, hdcMem, 0, 0, SRCCOPY);
 
     auto previous = std::chrono::high_resolution_clock::now();
-    std::thread inputThread(handleInput, std::ref(cam));
-    while (true) {
+    std::thread inputThread(handleInput, std::ref(cam), hwnd);
+    bool running = true;
+    while (running) {
+        MSG msg;
+        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+            if (msg.message == WM_QUIT) {
+                running = false;
+            }
+            else {
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+        }
         while (ShowCursor(FALSE) >= 0);
 
         auto start = std::chrono::high_resolution_clock::now();
@@ -153,7 +212,7 @@ int main() {
         cam.rotate_yaw(dx * sensitivity);  // Horizontal movement affects yaw
         cam.rotate_pitch(dy * sensitivity); // Vertical movement affects pitch
         cam.initialize();
-        centerMouse(hwnd);
+        if (inFocus) centerMouse(hwnd);
         mouse_flag.store(false);
 
         previous = start;
