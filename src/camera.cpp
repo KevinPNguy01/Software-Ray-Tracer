@@ -98,6 +98,15 @@ void Camera::initialize() {
     defocus_disk_v = v * defocus_radius;
 }
 
+void Camera::autoFocus(const Hittable& world) {
+    Hit hit;
+    Vec3 dir = unit_vector(pixel00_loc + (image_width/2) * pixel_dx + (image_height/2) * pixel_dy - look_from);
+    Ray r = Ray(look_from, dir);
+    if (world.hit(r, Range(0.001, std::numeric_limits<float>::infinity()), hit)) {
+        focus_dist = hit.t;
+    }
+}
+
 void Camera::increaseQuality() {
     samples_per_pixel = min(2048, samples_per_pixel * 2);
     max_depth = min(24, max_depth + 2);

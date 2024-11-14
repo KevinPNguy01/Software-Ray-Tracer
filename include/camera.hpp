@@ -20,6 +20,7 @@ public:
 	void render_region(const Hittable& world, void* bits, int start_y, int end_y);
 
 	void initialize();
+	void autoFocus(const Hittable& world);
 
 	void move(direction dir, float amount);
 	void rotate_yaw(float angle);
@@ -35,7 +36,7 @@ private:
 	int max_depth = 2;
 	float pixel_samples_scale;
 	float vfov = 70;
-	float defocus_angle = 10;
+	float defocus_angle = 2;
 	float focus_dist = 1;
 
 	float yaw = 0;

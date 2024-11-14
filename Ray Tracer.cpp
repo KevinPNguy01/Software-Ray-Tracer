@@ -33,7 +33,7 @@ POINT lastMousePos;
 int dx, dy;
 
 float aspect_ratio = 16.0 / 9;
-int image_width = 1200;
+int image_width = 800;
 int image_height = max(1, int(image_width / aspect_ratio));
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -211,6 +211,7 @@ int main() {
         const float sensitivity = 0.25f; // Adjust sensitivity as needed
         cam.rotate_yaw(dx * sensitivity);  // Horizontal movement affects yaw
         cam.rotate_pitch(dy * sensitivity); // Vertical movement affects pitch
+        cam.autoFocus(world);
         cam.initialize();
         if (inFocus) centerMouse(hwnd);
         mouse_flag.store(false);
