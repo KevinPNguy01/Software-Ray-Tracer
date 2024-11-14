@@ -122,6 +122,15 @@ inline Vec3 random_unit_vector() {
 	}
 }
 
+inline Vec3 random_in_unit_disk() {
+	while (1) {
+		Vec3 p = Vec3(random_float(-1, 1), random_float(-1, 1), 0);
+		if (p.length_squared() < 1) {
+			return p;
+		}
+	}
+}
+
 inline Vec3 random_on_hemisphere(const Vec3& normal) {
 	Vec3 unit_vector = random_unit_vector();
 	return unit_vector * (dot(unit_vector, normal) > 0 ? 1 : -1);

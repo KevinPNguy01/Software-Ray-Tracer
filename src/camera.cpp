@@ -7,8 +7,16 @@ Camera::Camera(Vec3 look_from, int image_width, float aspect_ratio) : look_from(
 Ray Camera::get_ray(int x, int y) {
     float offset_x = random_float() - 0.5;
     float offset_y = random_float() - 0.5;
-    Vec3 dir = pixel00_loc + (offset_x + x) * pixel_dx + (offset_y + y) * pixel_dy - look_from;
-    return Ray(look_from, dir);
+    Vec3 pos;
+    if (defocus_angle <= 0) {
+        pos = look_from;
+    }
+    else {
+        Vec3 p = random_in_unit_disk();
+        pos = look_from + p[0] * defocus_disk_u + p[1] * defocus_disk_v;
+    }
+    Vec3 dir = pixel00_loc + (offset_x + x) * pixel_dx + (offset_y + y) * pixel_dy - pos;
+    return Ray(pos, dir);
 }
 
 Color Camera::ray_color(const Ray& r, int depth, const Hittable& world) {
@@ -62,10 +70,9 @@ void Camera::initialize() {
     image_height = max(1, int(image_width / aspect_ratio));
     pixel_samples_scale = 1.0 / samples_per_pixel;
 
-    float focal_length = 1;
     float theta = degrees_to_radians(vfov);
     float h = tan(theta / 2);
-    float viewport_height = 2 * h * focal_length;
+    float viewport_height = 2 * h * focus_dist;
     float viewport_width = viewport_height * ((float)image_width / image_height);
 
     Vec3 forward(
@@ -83,8 +90,12 @@ void Camera::initialize() {
     pixel_dx = viewport_x / image_width;
     pixel_dy = viewport_y / image_height;
 
-    Vec3 viewport_upper_left = look_from - viewport_x / 2 - viewport_y / 2 - focal_length * w;
+    Vec3 viewport_upper_left = look_from - viewport_x / 2 - viewport_y / 2 - focus_dist * w;
     pixel00_loc = viewport_upper_left + 0.5 * (pixel_dx + pixel_dy);
+
+    float defocus_radius = focus_dist * std::tan(degrees_to_radians(defocus_angle / 2));
+    defocus_disk_u = u * defocus_radius;
+    defocus_disk_v = v * defocus_radius;
 }
 
 void Camera::increaseQuality() {

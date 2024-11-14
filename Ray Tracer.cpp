@@ -18,7 +18,6 @@
 #include "util.hpp"
 #include "metal.hpp"
 #include "lambertian.hpp"
-#include "dielectric.hpp"
 
 using std::make_shared;
 using std::shared_ptr;
@@ -34,7 +33,7 @@ POINT lastMousePos;
 int dx, dy;
 
 float aspect_ratio = 16.0 / 9;
-int image_width = 800;
+int image_width = 1200;
 int image_height = max(1, int(image_width / aspect_ratio));
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -149,7 +148,7 @@ int main() {
     SelectObject(hdcMem, hBitmap);
 
     shared_ptr<Lambertian> ground = make_shared<Lambertian>(Color(0.7, 0.7, 0.7));
-    shared_ptr<Dielectric> purple = make_shared<Dielectric>(Color(1,1,1), 1/1.5);
+    shared_ptr<Lambertian> purple = make_shared<Lambertian>(Color(0.803921568627451, 0.7058823529411765, 0.8588235294117647));
     shared_ptr<Lambertian> pink = make_shared<Lambertian>(Color(1, 0.7843137254901961, 0.8666666666666667));
     shared_ptr<Lambertian> dark_pink = make_shared<Lambertian>(Color(1, 0.6862745098039216, 0.8));
     shared_ptr<Metal> metal = make_shared<Metal>(Color(0.9, 0.9, 0.9), 0.01);

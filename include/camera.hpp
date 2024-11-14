@@ -35,6 +35,8 @@ private:
 	int max_depth = 2;
 	float pixel_samples_scale;
 	float vfov = 70;
+	float defocus_angle = 10;
+	float focus_dist = 1;
 
 	float yaw = 0;
 	float pitch = 0;
@@ -48,6 +50,9 @@ private:
 
 	// Camera basis vectors.
 	Vec3 u, v, w;
+
+	Vec3 defocus_disk_u;
+	Vec3 defocus_disk_v;
 
 	Ray get_ray(int x, int y);
 	Color ray_color(const Ray& r, int depth, const Hittable& world);
