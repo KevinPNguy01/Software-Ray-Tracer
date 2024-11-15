@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "ray.hpp"
+#include "aabb.hpp"
 #include "range.hpp"
 #include "material.hpp"
 
@@ -26,4 +27,6 @@ public:
 class Hittable {
 public:
 	virtual bool hit(const Ray& r, Range range, Hit& hit) const = 0;
+
+	virtual AABB bounding_box() const = 0;
 };

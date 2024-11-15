@@ -18,6 +18,7 @@
 #include "util.hpp"
 #include "metal.hpp"
 #include "lambertian.hpp"
+#include "bvh.hpp"
 
 using std::make_shared;
 using std::shared_ptr;
@@ -148,17 +149,19 @@ int main() {
     SelectObject(hdcMem, hBitmap);
 
     shared_ptr<Lambertian> ground = make_shared<Lambertian>(Color(0.7, 0.7, 0.7));
-    shared_ptr<Lambertian> purple = make_shared<Lambertian>(Color(0.803921568627451, 0.7058823529411765, 0.8588235294117647));
-    shared_ptr<Lambertian> pink = make_shared<Lambertian>(Color(1, 0.7843137254901961, 0.8666666666666667));
-    shared_ptr<Lambertian> dark_pink = make_shared<Lambertian>(Color(1, 0.6862745098039216, 0.8));
+    shared_ptr<Lambertian> red = make_shared<Lambertian>(Color(1, 0.34901960784313724, 0.3686274509803922));
+    shared_ptr<Lambertian> blue = make_shared<Lambertian>(Color(0.09803921568627451, 0.5098039215686274, 0.7686274509803922));
+    shared_ptr<Lambertian> yellow = make_shared<Lambertian>(Color(1, 0.792156862745098, 0.22745098039215686));
     shared_ptr<Metal> metal = make_shared<Metal>(Color(0.9, 0.9, 0.9), 0.01);
 
     HittableList world;
-    world.add(make_shared<Sphere>(Point3(0, 0, -1.5), 0.5, metal));
-    world.add(make_shared<Sphere>(Point3(1, 0, -1), 0.5, pink));
-    world.add(make_shared<Sphere>(Point3(-1, 0, -1), 0.5, purple));
-    world.add(make_shared<Sphere>(Point3(-0.25, -0.4, -0.75), 0.1, dark_pink));
-    world.add(make_shared<Sphere>(Point3(0, -100.5, -1), 100, ground));
+    world.add(make_shared<Sphere>(Point3(0, -1000, -1), 1000, ground));
+    world.add(make_shared<Sphere>(Point3(0, 0.3, -1.5), 0.3, metal));
+    world.add(make_shared<Sphere>(Point3(0.5, 0.4, -0.5), 0.4, blue));
+    world.add(make_shared<Sphere>(Point3(-0.75, 0.2, -1.25), 0.2, red));
+    world.add(make_shared<Sphere>(Point3(-0.25, 0.1, -0.75), 0.1, yellow));
+
+    world = HittableList(make_shared<BVH_Node>(world));
 
     Camera cam(Vec3(0, 1, 1), image_width, aspect_ratio);
     BitBlt(GetDC(hwnd), 0, 0, image_width, image_height, hdcMem, 0, 0, SRCCOPY);

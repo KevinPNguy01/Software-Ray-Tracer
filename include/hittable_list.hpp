@@ -5,6 +5,7 @@
 
 #include "hittable.hpp"
 #include "range.hpp"
+#include "aabb.hpp"
 
 using std::make_shared;
 using std::shared_ptr;
@@ -20,11 +21,11 @@ public:
 
 	void add(shared_ptr<Hittable> object) {
 		objects.push_back(object);
+		bbox = AABB(bbox, object->bounding_box());
 	}
 	void clear() {
 		objects.clear();
 	}
-
 
 	bool hit(const Ray& r, Range range, Hit& hit_obj) const override {
 		Hit hit_temp;
@@ -41,4 +42,11 @@ public:
 
 		return did_hit;
 	}
+
+	AABB bounding_box() const override {
+		return bbox;
+	}
+
+private:
+	AABB bbox;
 };

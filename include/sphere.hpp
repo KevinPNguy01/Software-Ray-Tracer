@@ -4,7 +4,10 @@
 
 class Sphere : public Hittable {
 public:
-	Sphere(const Point3& pos, float radius, shared_ptr<Material> mat) : pos(pos), radius(abs(radius)), mat(mat) {}
+	Sphere(const Point3& pos, float radius, shared_ptr<Material> mat) : pos(pos), radius(abs(radius)), mat(mat) {
+        Vec3 rvec(radius, radius, radius);
+        bbox = AABB(pos - rvec, pos + rvec);
+    }
 
     bool hit(const Ray& r, Range range, Hit& hit) const override {
         Vec3 d = pos - r.position();
@@ -33,8 +36,14 @@ public:
 
         return true;
     }
+
+    AABB bounding_box() const override {
+        return bbox;
+    }
+
 private:
     Point3 pos;
     shared_ptr<Material> mat;
     float radius;
+    AABB bbox;
 };
