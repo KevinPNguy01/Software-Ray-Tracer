@@ -20,6 +20,7 @@
 #include "lambertian.hpp"
 #include "bvh.hpp"
 #include "quad.hpp"
+#include "diffuse_light.hpp"
 
 using std::make_shared;
 using std::shared_ptr;
@@ -150,18 +151,20 @@ int main() {
     SelectObject(hdcMem, hBitmap);
 
     shared_ptr<Lambertian> ground = make_shared<Lambertian>(Color(0.7, 0.7, 0.7));
-    shared_ptr<Lambertian> red = make_shared<Lambertian>(Color(1, 0.34901960784313724, 0.3686274509803922));
-    shared_ptr<Lambertian> blue = make_shared<Lambertian>(Color(0.09803921568627451, 0.5098039215686274, 0.7686274509803922));
-    shared_ptr<Lambertian> yellow = make_shared<Lambertian>(Color(1, 0.792156862745098, 0.22745098039215686));
-    shared_ptr<Metal> metal = make_shared<Metal>(Color(0.9, 0.9, 0.9), 0.01);
+    auto red = make_shared<Lambertian>(Color(.65, .05, .05));
+    auto white = make_shared<Lambertian>(Color(.73, .73, .73));
+    auto green = make_shared<Lambertian>(Color(.12, .45, .15));
+    auto light = make_shared<DiffuseLight>(Color(15, 15, 15));
 
     HittableList world;
-    world.add(make_shared<Sphere>(Point3(0, -1000, -1), 1000, ground));
-    world.add(make_shared<Sphere>(Point3(0, 0.3, -1.5), 0.3, metal));
-    world.add(make_shared<Sphere>(Point3(0.5, 0.4, -0.5), 0.4, blue));
-    world.add(make_shared<Sphere>(Point3(-0.75, 0.2, -1.25), 0.2, red));
-    world.add(make_shared<Sphere>(Point3(-0.25, 0.1, -0.75), 0.1, yellow));
-    world.add(make_shared<Quad>(Point3(-2, 0, -2), Vec3(4, 0, 0), Vec3(0, 4, 0), metal));
+    world.add(make_shared<Sphere>(Point3(0, -1000, 0), 1000, ground));
+    world.add(make_shared<Sphere>(Point3(0, 1003, 0), 1000, white));
+    world.add(make_shared<Sphere>(Point3(-1001.5, 1.5, 0), 1000, white));
+    world.add(make_shared<Sphere>(Point3(0, 1.5, 1001.5), 1000, green));
+    world.add(make_shared<Sphere>(Point3(0, 1.5, -1001.5), 1000, red));
+
+    world.add(make_shared<Sphere>(Point3(0, 0.75, 0), 0.75, white));
+    world.add(make_shared<Quad>(Point3(.5, 2.999, .5), Vec3(-1, 0, 0), Vec3(0, 0, -1), light));
 
     world = HittableList(make_shared<BVH_Node>(world));
 

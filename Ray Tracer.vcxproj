@@ -143,6 +143,7 @@
     <ClInclude Include="include\camera.hpp" />
     <ClInclude Include="include\color.hpp" />
     <ClInclude Include="include\dielectric.hpp" />
+    <ClInclude Include="include\diffuse_light.hpp" />
     <ClInclude Include="include\hittable.hpp" />
     <ClInclude Include="include\lambertian.hpp" />
     <ClInclude Include="include\material.hpp" />

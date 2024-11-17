@@ -16,7 +16,7 @@ inline COLORREF color_to_BGR(const Color& c) {
 }
 
 inline float linear_to_gamma(const float val) {
-    return val > 0 ? sqrt(val) : 0;
+    return val > 0 ? min(sqrt(val), 1) : 0;
 }
 
 inline Color correct_gamma(const Color& c) {

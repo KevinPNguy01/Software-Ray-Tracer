@@ -18,6 +18,7 @@ public:
 		x = (a[0] <= b[0]) ? Range(a[0], b[0]) : Range(b[0], a[0]);
 		y = (a[1] <= b[1]) ? Range(a[1], b[1]) : Range(b[1], a[1]);
 		z = (a[2] <= b[2]) ? Range(a[2], b[2]) : Range(b[2], a[2]);
+		pad_to_minimum();
 	}
 
 	AABB(const AABB& bbox0, const AABB& bbox1) {

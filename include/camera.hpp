@@ -35,7 +35,7 @@ private:
 	int image_height;
 	int max_depth = 2;
 	float pixel_samples_scale;
-	float vfov = 70;
+	float vfov = 90;
 	float defocus_angle = 2;
 	float focus_dist = 1;
 

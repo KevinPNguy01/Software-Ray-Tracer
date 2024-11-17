@@ -28,10 +28,11 @@ Color Camera::ray_color(const Ray& r, int depth, const Hittable& world) {
     if (world.hit(r, Range(0.001, std::numeric_limits<float>::infinity()), hit)) {
         Ray scattered;
         Color attenuation;
+        Color emitted = hit.mat->emitted(hit.p);
         if (hit.mat->scatter(r, hit, attenuation, scattered)) {
-            return attenuation * ray_color(scattered, depth-1, world);
+            return attenuation * ray_color(scattered, depth-1, world) + emitted;
         }
-        return Color();
+        return emitted;
     }
     
     Vec3 unit = unit_vector(r.direction());
@@ -108,8 +109,8 @@ void Camera::autoFocus(const Hittable& world) {
 }
 
 void Camera::increaseQuality() {
-    samples_per_pixel = min(2048, samples_per_pixel * 2);
-    max_depth = min(24, max_depth + 2);
+    samples_per_pixel = min(8192, samples_per_pixel * 2);
+    max_depth = min(4, max_depth + 2);
     initialize();
 }
 
@@ -137,7 +138,8 @@ void Camera::render_region(const Hittable& world, void* bits, int start_y, int e
                 float green = static_cast<float>(GetGValue(colorRef)) / 255.0f;
                 float blue = static_cast<float>(GetBValue(colorRef)) / 255.0f;
                 Color prevCol(blue, green, red);
-                ((DWORD*)bits)[y * image_width + x] = color_to_BGR(prevCol / 2 + correct_gamma(c * pixel_samples_scale) * sqrt(2) / 2);
+                Color col = prevCol / 2 + correct_gamma(c * pixel_samples_scale * 2) / sqrt(2) / 2;
+                ((DWORD*)bits)[y * image_width + x] = color_to_BGR(col);
             }
             else {
                 ((DWORD*)bits)[y * image_width + x] = color_to_BGR(correct_gamma(c * pixel_samples_scale));

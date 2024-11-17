@@ -80,5 +80,8 @@
     <ClInclude Include="include\quad.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\diffuse_light.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
