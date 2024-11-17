@@ -10,7 +10,9 @@ public:
 
 	AABB() {}
 
-	AABB(const Range& x, const Range& y, const Range& z) : x(x), y(y), z(z) {}
+	AABB(const Range& x, const Range& y, const Range& z) : x(x), y(y), z(z) {
+		pad_to_minimum();
+	}
 
 	AABB(const Point3& a, const Point3& b) {
 		x = (a[0] <= b[0]) ? Range(a[0], b[0]) : Range(b[0], a[0]);
@@ -63,6 +65,13 @@ public:
 		else {
 			return y.size() > z.size() ? 1 : 2;
 		}
+	}
+
+	void pad_to_minimum() {
+		float delta = 0.0001;
+		if (x.size() < delta) x.expand(delta);
+		if (y.size() < delta) y.expand(delta);
+		if (z.size() < delta) z.expand(delta);
 	}
 
 	static const AABB empty, universe;

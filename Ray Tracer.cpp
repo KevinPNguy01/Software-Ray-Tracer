@@ -19,6 +19,7 @@
 #include "metal.hpp"
 #include "lambertian.hpp"
 #include "bvh.hpp"
+#include "quad.hpp"
 
 using std::make_shared;
 using std::shared_ptr;
@@ -160,6 +161,7 @@ int main() {
     world.add(make_shared<Sphere>(Point3(0.5, 0.4, -0.5), 0.4, blue));
     world.add(make_shared<Sphere>(Point3(-0.75, 0.2, -1.25), 0.2, red));
     world.add(make_shared<Sphere>(Point3(-0.25, 0.1, -0.75), 0.1, yellow));
+    world.add(make_shared<Quad>(Point3(-2, 0, -2), Vec3(4, 0, 0), Vec3(0, 4, 0), metal));
 
     world = HittableList(make_shared<BVH_Node>(world));
 

@@ -147,6 +147,7 @@
     <ClInclude Include="include\lambertian.hpp" />
     <ClInclude Include="include\material.hpp" />
     <ClInclude Include="include\metal.hpp" />
+    <ClInclude Include="include\quad.hpp" />
     <ClInclude Include="include\range.hpp" />
     <ClInclude Include="include\ray.hpp" />
     <ClInclude Include="include\sphere.hpp" />

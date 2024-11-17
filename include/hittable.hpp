@@ -10,7 +10,7 @@
 class Hit {
 public:
 	Point3 p;
-	Vec3 normal;
+	Vec3 normal, u, v;
 	std::shared_ptr<Material> mat;
 	float t;
 	bool front_face;
