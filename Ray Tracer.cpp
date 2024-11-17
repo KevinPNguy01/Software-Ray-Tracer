@@ -168,22 +168,15 @@ int main() {
 
     world = HittableList(make_shared<BVH_Node>(world));
 
-    Camera cam(Vec3(0, 1, 1), image_width, aspect_ratio);
+    Camera cam(Vec3(0, 1, 0), image_width, aspect_ratio);
     BitBlt(GetDC(hwnd), 0, 0, image_width, image_height, hdcMem, 0, 0, SRCCOPY);
 
     auto previous = std::chrono::high_resolution_clock::now();
     std::thread inputThread(handleInput, std::ref(cam), hwnd);
     bool running = true;
     while (running) {
-        MSG msg;
-        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-            if (msg.message == WM_QUIT) {
-                running = false;
-            }
-            else {
-                TranslateMessage(&msg);
-                DispatchMessage(&msg);
-            }
+        if (cam.samples_per_pixel == 65536 + 1) {
+            continue;
         }
         while (ShowCursor(FALSE) >= 0);
 
@@ -191,11 +184,25 @@ int main() {
         auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(start - previous).count();
 
         // Render regions of the screen in separate threads.
-        const int num_threads = 16;
-        int region_size = image_height / 16 + 1;
+        int n = cam.num_threads;
+        int region_size = image_height / n + 1;
         std::vector<std::thread> threads;
-        for (int i = 0; i < num_threads; ++i) {
+        cam.restart_rendering();
+        for (int i = 0; i < n; ++i) {
             threads.emplace_back(&Camera::render_region, &cam, std::ref(world), bits, i * region_size, min(image_height, (i + 1) * region_size));
+        }
+        while (!cam.done_rendering()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            MSG msg;
+            while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+                if (msg.message == WM_QUIT) {
+                    running = false;
+                }
+                else {
+                    TranslateMessage(&msg);
+                    DispatchMessage(&msg);
+                }
+            }
         }
         for (auto& thread : threads) {
             thread.join();

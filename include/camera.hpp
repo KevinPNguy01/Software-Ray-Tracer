@@ -2,6 +2,7 @@
 
 #include <limits>
 #include <atomic>
+#include <mutex>
 
 #include "hittable.hpp"
 #include "color.hpp"
@@ -10,6 +11,7 @@
 class Camera {
 public:
 	int samples_per_pixel = 1;
+	int num_threads = 8;
 
 	std::atomic<bool> restart_render;
 
@@ -29,13 +31,16 @@ public:
 	void increaseQuality();
 	void resetQuality();
 
+	void restart_rendering();
+	bool done_rendering();
+
 private:
 	float aspect_ratio = 1;
 	int image_width = 400;
 	int image_height;
 	int max_depth = 2;
 	float pixel_samples_scale;
-	float vfov = 90;
+	float vfov = 40;
 	float defocus_angle = 2;
 	float focus_dist = 1;
 
@@ -57,4 +62,7 @@ private:
 
 	Ray get_ray(int x, int y);
 	Color ray_color(const Ray& r, int depth, const Hittable& world);
+
+	std::mutex lock;
+	int workers_done = 0;
 };

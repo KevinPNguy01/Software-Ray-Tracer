@@ -109,7 +109,7 @@ void Camera::autoFocus(const Hittable& world) {
 }
 
 void Camera::increaseQuality() {
-    samples_per_pixel = min(8192, samples_per_pixel * 2);
+    samples_per_pixel = min(65536+1, samples_per_pixel * 2);
     max_depth = min(4, max_depth + 2);
     initialize();
 }
@@ -123,6 +123,9 @@ void Camera::render_region(const Hittable& world, void* bits, int start_y, int e
     for (int y = start_y; y < end_y; ++y) {
         for (int x = 0; x < image_width; ++x) {
             if (restart_render.load() && samples_per_pixel > 1) {
+                lock.lock();
+                workers_done += 1;
+                lock.unlock();
                 return;
             }
             Vec3 pixel_center = pixel00_loc + x * pixel_dx + y * pixel_dy;
@@ -147,6 +150,22 @@ void Camera::render_region(const Hittable& world, void* bits, int start_y, int e
             
         }
     }
+    lock.lock();
+    workers_done += 1;
+    lock.unlock();
+}
+
+bool Camera::done_rendering() {
+    lock.lock();
+    bool done = workers_done == num_threads;
+    lock.unlock();
+    return done;
+}
+
+void Camera::restart_rendering() {
+    lock.lock();
+    workers_done = 0;
+    lock.unlock();
 }
 
 void Camera::rotate_yaw(float angle) {
