@@ -141,7 +141,7 @@ void Camera::render_region(const Hittable& world, void* bits, int start_y, int e
                 float green = static_cast<float>(GetGValue(colorRef)) / 255.0f;
                 float blue = static_cast<float>(GetBValue(colorRef)) / 255.0f;
                 Color prevCol(blue, green, red);
-                Color col = prevCol / 2 + correct_gamma(c * pixel_samples_scale * 2) / sqrt(2) / 2;
+                Color col = prevCol / 2 + correct_gamma(c * pixel_samples_scale * 2) / 2;
                 ((DWORD*)bits)[y * image_width + x] = color_to_BGR(col);
             }
             else {

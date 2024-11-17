@@ -152,23 +152,36 @@ int main() {
 
     shared_ptr<Lambertian> ground = make_shared<Lambertian>(Color(0.7, 0.7, 0.7));
     auto red = make_shared<Lambertian>(Color(.65, .05, .05));
+    auto pink = make_shared<Lambertian>(Color(1, .78, .87));
     auto white = make_shared<Lambertian>(Color(.73, .73, .73));
     auto green = make_shared<Lambertian>(Color(.12, .45, .15));
-    auto light = make_shared<DiffuseLight>(Color(15, 15, 15));
+    auto light = make_shared<DiffuseLight>(Color(4,4,4));
+    auto light_blue = make_shared<Lambertian>(Color(0.74, 0.88, 1));
+    auto purple = make_shared<Lambertian>(Color(0.8, 0.71, 0.86));
+    auto blue = make_shared<Lambertian>(Color(0.64, 0.82, 1));
+    auto mirror = make_shared<Metal>(Color(1, 1, 1), 0);
 
     HittableList world;
-    world.add(make_shared<Sphere>(Point3(0, -1000, 0), 1000, ground));
-    world.add(make_shared<Sphere>(Point3(0, 1003, 0), 1000, white));
-    world.add(make_shared<Sphere>(Point3(-1001.5, 1.5, 0), 1000, white));
-    world.add(make_shared<Sphere>(Point3(0, 1.5, 1001.5), 1000, green));
-    world.add(make_shared<Sphere>(Point3(0, 1.5, -1001.5), 1000, red));
+    world.add(make_shared<Sphere>(Point3(0, -10000, 0), 10000, ground));
+    world.add(make_shared<Quad>(Point3(-1.5, 3, -1.5), Vec3(6, 0, 0), Vec3(0, 0, 6), white));
+    world.add(make_shared<Quad>(Point3(-1.5, 0, -1.5), Vec3(6, 0, 0), Vec3(0, 3, 0), pink));
+    world.add(make_shared<Quad>(Point3(-1.5, 0, -1.5), Vec3(0, 0, 6), Vec3(0, 3, 0), pink));
+    world.add(make_shared<Quad>(Point3(4.5, 0, 4.5), Vec3(-6, 0, 0), Vec3(0, 3, 0), pink));
+    world.add(make_shared<Quad>(Point3(4.5, 0, 4.5), Vec3(0, 0, -6), Vec3(0, 3, 0), pink));
+    world.add(make_shared<Quad>(Point3(-1.5, 0.5, -1), Vec3(0, 0, 2), Vec3(0, 2, 0), light));
+    world.add(make_shared<Quad>(Point3(-0.75, 0.75, -1.5), Vec3(1.5, 0, 0), Vec3(0, 1.5, 0), mirror));
 
-    world.add(make_shared<Sphere>(Point3(0, 0.75, 0), 0.75, white));
-    world.add(make_shared<Quad>(Point3(.5, 2.999, .5), Vec3(-1, 0, 0), Vec3(0, 0, -1), light));
+    world.add(make_shared<Quad>(Point3(-0.5, 0, -0.5), Vec3(0, 0, 1), Vec3(0, 1, 0), ground));
+    world.add(make_shared<Quad>(Point3(-0.5, 0, -0.5), Vec3(1, 0, 0), Vec3(0, 1, 0), ground));
+    world.add(make_shared<Quad>(Point3(0.5, 0, 0.5), Vec3(0, 0, -1), Vec3(0, 1, 0), ground));
+    world.add(make_shared<Quad>(Point3(0.5, 0, 0.5), Vec3(-1, 0, 0), Vec3(0, 1, 0), ground));
+    world.add(make_shared<Quad>(Point3(-0.5, 1, -0.5), Vec3(0, 0, 1), Vec3(1, 0, 0), ground));
+    world.add(make_shared<Sphere>(Point3(0.25, 1.2, -0.25), 0.2, blue));
+    world.add(make_shared<Sphere>(Point3(-0.25, 1.25, 0.25), 0.25, purple));
 
     world = HittableList(make_shared<BVH_Node>(world));
 
-    Camera cam(Vec3(0, 1, 0), image_width, aspect_ratio);
+    Camera cam(Vec3(2.5, 1.5, 2.5), image_width, aspect_ratio);
     BitBlt(GetDC(hwnd), 0, 0, image_width, image_height, hdcMem, 0, 0, SRCCOPY);
 
     auto previous = std::chrono::high_resolution_clock::now();

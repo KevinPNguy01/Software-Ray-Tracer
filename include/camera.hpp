@@ -41,7 +41,7 @@ private:
 	int max_depth = 2;
 	float pixel_samples_scale;
 	float vfov = 40;
-	float defocus_angle = 2;
+	float defocus_angle = 0;
 	float focus_dist = 1;
 
 	float yaw = 0;
