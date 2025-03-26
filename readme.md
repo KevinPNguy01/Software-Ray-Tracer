@@ -1,4 +1,4 @@
-# Real-time Ray Tracer
+# Real-time Path Tracer
 A real-time path tracing engine developed entirely in C++ using the WinAPI for window management and user input.
 
 ## Key Features
